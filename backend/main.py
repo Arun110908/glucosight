@@ -1,5 +1,5 @@
 """
-GlucoSight Risk Intelligence API
+AD GlucoSight Risk Intelligence API
 FastAPI backend serving the LightGBM+KNN soft-voting ensemble with
 SHAP-based local explanations.
 

@@ -1,4 +1,4 @@
-# GlucoSight — Diabetic Disease Progression Risk Prediction
+# AD GlucoSight — Diabetic Disease Progression Risk Prediction
 
 Optimized LightGBM + KNN soft-voting ensemble with SHAP explainability,
 served through a FastAPI backend and a Streamlit dashboard.

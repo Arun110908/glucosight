@@ -1,5 +1,5 @@
 """
-GlucoSight Risk Intelligence - Streamlit dashboard.
+AD GlucoSight Risk Intelligence - Streamlit dashboard.
 Talks only to the local FastAPI backend; never persists patient data.
 """
 import os
@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(
-    page_title="GlucoSight Risk Intelligence",
+    page_title="AD GlucoSight Risk Intelligence",
     page_icon="🩺",
     layout="wide",
 )
@@ -59,7 +59,7 @@ with st.sidebar:
     st.caption("• Use de-identified, approved data only")
 
 # ---------- Header ----------
-st.title("🩺 GlucoSight Risk Intelligence")
+st.title("🩺 AD GlucoSight Risk Intelligence")
 st.caption("Optimized LightGBM + KNN soft-voting ensemble, with transparent local feature explanations.")
 st.info(
     "**Important:** This app is an academic decision-support demonstration. "

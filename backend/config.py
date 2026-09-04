@@ -1,5 +1,5 @@
 """
-Central configuration for the GlucoSight API.
+Central configuration for the AD GlucoSight API.
 All values can be overridden via environment variables (.env file).
 """
 import os
@@ -8,7 +8,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 class Settings:
-    APP_NAME: str = "GlucoSight Risk Intelligence API"
+    APP_NAME: str = "AD GlucoSight Risk Intelligence API"
     APP_VERSION: str = "1.0.0"
 
     # Model artifact location
