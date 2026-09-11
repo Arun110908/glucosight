@@ -18,9 +18,13 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 from lightgbm import LGBMClassifier
 
+# NOTE: "genetic_risk_score" MUST stay last and MUST match FEATURE_ORDER
+# in backend/model_service.py — the fitted scaler expects this exact
+# column order at inference time.
 FEATURE_ORDER = [
     "age", "bmi", "blood_pressure", "glucose",
     "insulin", "cholesterol", "hba1c", "sugar",
+    "genetic_risk_score",
 ]
 
 

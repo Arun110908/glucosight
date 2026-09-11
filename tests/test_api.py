@@ -14,6 +14,8 @@ def test_predict_valid_payload():
     payload = {
         "age": 45, "bmi": 27.5, "blood_pressure": 125, "glucose": 125,
         "insulin": 85, "cholesterol": 205, "hba1c": 6.1, "sugar": 115,
+        "parent_diabetic": 1, "sibling_diabetic": 0,
+        "early_onset_relative": 0, "ethnicity_risk_factor": 0.3,
     }
     resp = client.post("/api/v1/predict", json=payload)
     # 200 if model trained, 503 if not trained yet - both are valid states
@@ -22,12 +24,15 @@ def test_predict_valid_payload():
         body = resp.json()
         assert 0.0 <= body["risk_score"] <= 1.0
         assert body["risk_band"] in ("Low", "Moderate", "High")
+        assert 0.0 <= body["genetic_risk_score"] <= 1.0
 
 
 def test_predict_rejects_out_of_range():
     payload = {
         "age": 999, "bmi": 27.5, "blood_pressure": 125, "glucose": 125,
         "insulin": 85, "cholesterol": 205, "hba1c": 6.1, "sugar": 115,
+        "parent_diabetic": 1, "sibling_diabetic": 0,
+        "early_onset_relative": 0, "ethnicity_risk_factor": 0.3,
     }
     resp = client.post("/api/v1/predict", json=payload)
     assert resp.status_code == 422

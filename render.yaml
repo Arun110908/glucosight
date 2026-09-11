@@ -1,0 +1,38 @@
+# Render Blueprint — deploys the GlucoSight FastAPI backend (free tier).
+# Place this file at your repo ROOT (same level as requirements.txt).
+#
+# How to use:
+#   1. Push this file to your GitHub repo (root level).
+#   2. Go to https://dashboard.render.com -> New -> Blueprint.
+#   3. Connect your GitHub repo (Arun110908/glucosight).
+#   4. Render reads this file automatically and creates the service.
+#   5. After the first deploy, copy the service URL (looks like
+#      https://glucosight-api.onrender.com) — you'll need it for the
+#      Streamlit Cloud frontend's API_BASE_URL secret.
+#   6. Come back here and update ALLOWED_ORIGINS below with your
+#      Streamlit Cloud app URL once you have it, then redeploy.
+#
+# Free tier note: the service sleeps after ~15 min of no traffic and
+# takes ~30-50s to wake on the next request — normal for a free demo/
+# portfolio link, not a problem for a resume/review showcase.
+
+services:
+  - type: web
+    name: glucosight-api
+    env: python
+    plan: free
+    region: singapore
+    buildCommand: >
+      pip install -r requirements.txt &&
+      python -m training.generate_demo_data --rows 500 &&
+      python -m training.train --demo
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ALLOWED_ORIGINS
+        value: https://REPLACE-WITH-YOUR-STREAMLIT-APP-URL.streamlit.app
+      - key: RATE_LIMIT_REQUESTS
+        value: "30"
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"

@@ -33,6 +33,10 @@ class Settings:
         "cholesterol": (80, 500),
         "hba1c": (3.0, 18.0),
         "sugar": (40, 500),
+        "parent_diabetic": (0, 2),
+        "sibling_diabetic": (0, 1),
+        "early_onset_relative": (0, 1),
+        "ethnicity_risk_factor": (0.0, 1.0),
     }
 
 settings = Settings()

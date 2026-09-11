@@ -19,6 +19,15 @@ class PatientInput(BaseModel):
     hba1c: float = Field(..., ge=3.0, le=18.0, description="HbA1c (%)")
     sugar: float = Field(..., ge=40, le=500, description="Fasting blood sugar (mg/dL)")
 
+    # --- Hereditary / genetic risk questionnaire (proxy for raw DNA data) ---
+    parent_diabetic: int = Field(..., ge=0, le=2, description="Number of parents diagnosed with diabetes")
+    sibling_diabetic: int = Field(..., ge=0, le=1, description="Any sibling diagnosed with diabetes (0/1)")
+    early_onset_relative: int = Field(..., ge=0, le=1, description="Any relative diagnosed before age 40 (0/1)")
+    ethnicity_risk_factor: float = Field(
+        ..., ge=0.0, le=1.0,
+        description="Population/hereditary risk weight from a literature-referenced PRS source",
+    )
+
 
 class FeatureContribution(BaseModel):
     feature: str
@@ -30,6 +39,10 @@ class PredictionResponse(BaseModel):
     risk_score: float = Field(..., description="Model-estimated probability of elevated risk (0-1)")
     risk_band: str = Field(..., description="Low / Moderate / High banding derived from risk_score")
     model_id: str
+    genetic_risk_score: float = Field(..., description="Computed hereditary/family-history risk score (0-1)")
+    genetic_contribution_pct: float = Field(
+        ..., description="Share (%) of this patient's total SHAP contribution attributable to genetic_risk_score"
+    )
     top_contributors: list[FeatureContribution]
     disclaimer: str = (
         "This is an academic decision-support demonstration. It does not diagnose "

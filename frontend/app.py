@@ -85,6 +85,25 @@ with col_form:
             cholesterol = st.number_input("Total cholesterol (mg/dL)", 80.0, 500.0, 205.0, step=1.0)
             sugar = st.number_input("Fasting blood sugar (mg/dL)", 40.0, 500.0, 115.0, step=1.0)
 
+        st.markdown("---")
+        st.markdown("##### Family / hereditary history")
+        st.caption("Replaces raw genetic/DNA collection with a short questionnaire-based risk proxy.")
+        g1, g2 = st.columns(2)
+        with g1:
+            parent_diabetic = st.selectbox("Parents with diabetes", options=[0, 1, 2])
+            sibling_diabetic = st.radio(
+                "Sibling diagnosed with diabetes?", options=[0, 1],
+                format_func=lambda x: "Yes" if x else "No", horizontal=True,
+            )
+        with g2:
+            early_onset_relative = st.radio(
+                "Relative diagnosed before age 40?", options=[0, 1],
+                format_func=lambda x: "Yes" if x else "No", horizontal=True,
+            )
+            ethnicity_risk_factor = st.slider(
+                "Population/ethnicity risk factor (literature-referenced PRS)", 0.0, 1.0, 0.3,
+            )
+
         submitted = st.form_submit_button("Analyse model-estimated risk", use_container_width=True)
 
 with col_result:
@@ -95,6 +114,8 @@ with col_result:
         payload = {
             "age": age, "bmi": bmi, "blood_pressure": bp, "glucose": glucose,
             "insulin": insulin, "cholesterol": cholesterol, "hba1c": hba1c, "sugar": sugar,
+            "parent_diabetic": parent_diabetic, "sibling_diabetic": sibling_diabetic,
+            "early_onset_relative": early_onset_relative, "ethnicity_risk_factor": ethnicity_risk_factor,
         }
         try:
             resp = requests.post(f"{API_BASE_URL}/api/v1/predict", json=payload, timeout=8)
@@ -108,6 +129,13 @@ with col_result:
                     <h2 style="margin:0">Risk score: {data['risk_score']:.2%}</h2>
                     <p>Risk band: <span class="{band_class}">{band}</span></p>
                     <p style="font-size:0.85rem;opacity:0.7">Model: {data['model_id']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                st.markdown(f"""
+                <div class="glow-card" style="margin-top:0.8rem">
+                    <p style="margin:0">Genetic Risk Score (family history): <b>{data['genetic_risk_score']:.2f} / 1.00</b></p>
+                    <p style="margin:0;opacity:0.85">Family/hereditary history contributed ~<b>{data['genetic_contribution_pct']:.1f}%</b> of this risk assessment.</p>
                 </div>
                 """, unsafe_allow_html=True)
 

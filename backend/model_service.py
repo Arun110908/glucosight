@@ -15,10 +15,21 @@ import shap
 
 from backend.config import settings
 from backend.schemas import PatientInput, PredictionResponse, FeatureContribution
+from backend.genetic_risk import compute_genetic_risk_score
 
+# NOTE: "genetic_risk_score" MUST stay last and MUST match the column
+# order used in training/train.py — the fitted scaler expects this
+# exact column order.
 FEATURE_ORDER = [
     "age", "bmi", "blood_pressure", "glucose",
     "insulin", "cholesterol", "hba1c", "sugar",
+    "genetic_risk_score",
+]
+
+# Raw questionnaire fields collected from the patient — these are NOT
+# passed to the model directly, they're combined into genetic_risk_score.
+GENETIC_INPUT_FIELDS = [
+    "parent_diabetic", "sibling_diabetic", "early_onset_relative", "ethnicity_risk_factor",
 ]
 
 
@@ -54,7 +65,14 @@ class ModelService:
             raise RuntimeError("Model is not loaded. Run training/train.py first.")
 
         with self._lock:
-            row = pd.DataFrame([[getattr(patient, f) for f in FEATURE_ORDER]], columns=FEATURE_ORDER)
+            genetic_score = compute_genetic_risk_score(
+                patient.parent_diabetic,
+                patient.sibling_diabetic,
+                patient.early_onset_relative,
+                patient.ethnicity_risk_factor,
+            )
+            clinical_values = [getattr(patient, f) for f in FEATURE_ORDER if f != "genetic_risk_score"]
+            row = pd.DataFrame([clinical_values + [genetic_score]], columns=FEATURE_ORDER)
             scaled = self.scaler.transform(row)
 
             lgbm_proba = self.lgbm_model.predict_proba(scaled)[0][1]
@@ -86,10 +104,18 @@ class ModelService:
             ]
             contributions.sort(key=lambda c: abs(c.shap_contribution), reverse=True)
 
+            total_abs = sum(abs(c.shap_contribution) for c in contributions) or 1.0
+            genetic_contrib = next(
+                (c.shap_contribution for c in contributions if c.feature == "genetic_risk_score"), 0.0
+            )
+            genetic_pct = round(abs(genetic_contrib) / total_abs * 100, 2)
+
             return PredictionResponse(
                 risk_score=round(risk_score, 4),
                 risk_band=band,
                 model_id=self.model_id,
+                genetic_risk_score=genetic_score,
+                genetic_contribution_pct=genetic_pct,
                 top_contributors=contributions[:5],
             )
 
