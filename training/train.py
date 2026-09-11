@@ -9,6 +9,7 @@ project abstract:
 """
 import argparse
 import datetime as dt
+import os
 import joblib
 import numpy as np
 import pandas as pd
@@ -102,6 +103,9 @@ def train(input_path: str, target_column: str, output_path: str,
         "feature_order": FEATURE_ORDER,
         "metrics": {"accuracy": acc, "roc_auc": auc},
     }
+    out_dir = os.path.dirname(output_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     joblib.dump(artifact, output_path)
     print(f"Saved model artifact to {output_path} (model_id={model_id})")
 

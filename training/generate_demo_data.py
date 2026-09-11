@@ -6,6 +6,7 @@ demonstrated end-to-end before you plug in a real, approved dataset
 (e.g. the sklearn diabetes dataset or an IEEE-referenced clinical set).
 """
 import argparse
+import os
 import numpy as np
 import pandas as pd
 
@@ -75,6 +76,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     df = generate(args.rows, args.seed)
+    out_dir = os.path.dirname(args.output)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     df.to_csv(args.output, index=False)
     print(f"Wrote {len(df)} rows to {args.output}")
     print("Class balance:", df["risk"].value_counts().to_dict())
