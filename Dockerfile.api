@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ backend/
+COPY training/ training/
+COPY data/ data/
+COPY models/ models/
+
+# NOTE: models/risk_model.joblib and data/demo_diabetes_data.csv are
+# committed to git (force-added, overriding .gitignore) specifically
+# so the Docker build doesn't need to retrain on Render's free tier
+# (limited CPU/RAM caused training to be OOM-killed mid-build).
+# To refresh the model: retrain locally, then
+#   git add -f models/risk_model.joblib data/demo_diabetes_data.csv
+# and push.
+
+EXPOSE 8000
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
