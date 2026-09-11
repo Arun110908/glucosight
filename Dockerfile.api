@@ -8,7 +8,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ backend/
 COPY training/ training/
-COPY models/ models/
+
+# Train fresh at build time so the model artifact always matches the
+# current FEATURE_ORDER (including genetic_risk_score). This avoids
+# committing a binary model file to git that can silently go stale.
+RUN python -m training.generate_demo_data --rows 500 && python -m training.train --demo
 
 EXPOSE 8000
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
